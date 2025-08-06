@@ -298,14 +298,15 @@
                         <th>created_at</th>
                         <th>image</th>
                         <th>size</th>
-                        <th>price_hourly</th>
+                        <th>price</th>
                         <th>region</th>
                         <th>ip</th>
+                        <th>Node stats</th>
                         <th>Links</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <template x-for="node in list">
+                    <template x-for="node in list" :key="node.name">
                         <tr>
                             <td x-text="node.name"></td>
                             <td x-text="node.memory_formatted"></td>
@@ -315,9 +316,38 @@
                             <td x-text="node.created_at"></td>
                             <td x-text="node.image"></td>
                             <td x-text="node.size"></td>
-                            <td x-text="node.price_hourly_formatted"></td>
+                            <td x-text="node.price_hourly_formatted + ' / h'"></td>
                             <td x-text="node.region"></td>
                             <td x-text="node.ip ?? 'n/a yet'"></td>
+                            <td>
+                                <template x-if="!node.ip">
+                                    <div>
+                                        <i class="bi bi-x-lg text-danger"></i>
+                                        Reachable
+                                    </div>
+                                </template>
+                                <template x-if="node.ip">
+                                    <div x-data="nodeStats(node)">
+                                        <div>
+                                            <i class="bi" :class="{'bi-check-lg': accessible, 'bi-x-lg text-danger': !accessible}"></i>
+                                            Reachable
+                                        </div>
+                                        <div class="mb-1">
+                                            <i class="bi" :class="{'bi-check-lg': node?.synced, 'bi-x-lg text-danger': !node?.synced}"></i>
+                                            Synced
+                                        </div>
+
+                                        <div x-show="node?.shardGroup !== -1" x-text="'Shard: #' + node?.shardGroup"></div>
+                                        <div x-show="node?.head?.height !== -1" x-text="'Height: ' + node?.head?.height"></div>
+
+                                        <div x-show="ledger?.finality?.consensus !== -1 && ledger?.finality?.client !== -1" class="fst-italic text-muted mt-1" style="font-size: 0.85em;">
+                                            Finalities:
+                                        </div>
+                                        <div x-show="ledger?.finality?.consensus !== -1" x-text="'Consensus: ' + ledger?.finality?.consensus"></div>
+                                        <div x-show="ledger?.finality?.client !== -1" x-text="'Client: ' + ledger?.finality?.client"></div>
+                                    </div>
+                                </template>
+                            </td>
                             <td>
                                 <template x-if="node.dashboard">
                                     <a :href="node.dashboard" target="_blank">Dashboard</a>

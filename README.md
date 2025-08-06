@@ -27,10 +27,12 @@ Easy: just throw this repository on your web server (really only `index.html`, `
 
 - [x] Public instance of web UI
 - [ ] Load some stats from running nodes (shard number, TPS, finality, etc.)
-  - [ ] Set up a centralized proxy server (required because of CORS)
+  - [x] Set up a centralized proxy server (required because of CORS)
   - [ ] Make node stat aggregation opt-in
+  - [ ] Make proxy server host configurable
 - [ ] Deletion of specific nodes
 - [ ] Auto-refresh of node list
 - [ ] Load regions and droplet sizes dynamically
 - [ ] Check in realtime if jar and config file are available under given base URL
+- [ ] Make reading of SSH keys optional 
 - [ ] Improve docs

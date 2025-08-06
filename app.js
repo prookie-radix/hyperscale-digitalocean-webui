@@ -200,6 +200,10 @@ Alpine.store('settings', {
     triggerActiveNodesRefresh() {
         ++this.triggerActiveNodesRefreshCount;
     },
+    triggerNodeStatsRefreshCount: 1, // keep at 1 minimum (truthy value)
+    triggerNodeStatsRefresh() {
+        ++this.triggerNodeStatsRefreshCount;
+    },
 });
 
 
@@ -345,6 +349,8 @@ Alpine.data('activeNodes', () => ({
             console.warn('activeNodes.load() set loading = true');
             this.list = [...await Alpine.store('settings').api.getActiveNodes()];
             this.error = false;
+
+            Alpine.store('settings').triggerNodeStatsRefresh();
         }
         catch (e) {
             this.error = true;
@@ -421,8 +427,6 @@ Alpine.data('currentCosts', () => ({
             console.warn('currentCosts.load() set loading = true');
             this.costs = await Alpine.store('settings').api.getCosts();
 
-            console.log('costs = ', this.costs);
-
             this.error = false;
         }
         catch (e) {
@@ -435,12 +439,143 @@ Alpine.data('currentCosts', () => ({
     },
 }));
 
+Alpine.data('nodeStats', (node) => ({
+    loading: false,
+    error: false,
+    accessible: false,
+    node: {
+        synced: false,
+        head: {
+            height: -1,
+            timestamp: -1,
+        },
+        shardGroup: -1,
+    },
+    network: {
+        connections: -1,
+    },
+    ledger: {
+        finality: {
+            consensus:  -1,
+            client: -1,
+        },
+    },
+
+    init() {
+        // this.load();
+
+        Alpine.effect(() => {
+            if (Alpine.store('settings').triggerNodeStatsRefreshCount) {
+                this.load();
+            }
+        });
+    },
+
+    async load() {
+        console.warn('currentCosts.load() called');
+
+        if (typeof node?.ip === 'undefined' || (node.ip + '').trim() === '') {
+            this.accessible = false;
+            console.error('nodeStats.load(): Can not load node stats as given ip node is empty');
+            return;
+        }
+
+        /*
+        if (this.loading) {
+            console.warn('activeNodes.load() already loading, exiting');
+            return;
+        }
+        */
+
+        try {
+            this.loading = true;
+
+            console.warn('nodeStats.load() [' + node.ip + ']: set loading = true');
+
+            this.node = {...await loadNodeStats(node.ip)};
+            this.network = {...(await loadNetworkStats(node.ip)).network};
+            this.ledger = {...(await loadLedgerStats(node.ip)).ledger};
+
+            this.accessible = true;
+            this.error = false;
+        }
+        catch (e) {
+            this.accessible = false;
+            this.error = true;
+        }
+        finally {
+            this.loading = false;
+            console.warn('nodeStats.load() [' + node.ip + ']: set loading = false');
+        }
+    },
+}));
+
+async function loadNodeStats(ip) {
+    const url = getApiUrl(ip, '/node');
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const jsonResponse = await response.json();
+
+    return {
+        synced: jsonResponse?.node?.synced,
+        head: {
+            height: jsonResponse?.node?.head?.height,
+            timestamp: jsonResponse?.node?.head?.timestamp,
+        },
+        shardGroup: jsonResponse?.node?.shard_group,
+    };
+}
+
+async function loadNetworkStats(ip) {
+    const url = getApiUrl(ip, '/network/statistics');
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const jsonResponse = await response.json();
+
+    return {
+        network: {
+            connections: jsonResponse?.statistics?.connections,
+        },
+    };
+}
+
+async function loadLedgerStats(ip) {
+    const url = getApiUrl(ip, '/ledger/statistics');
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const jsonResponse = await response.json();
+
+    return {
+        ledger: {
+            finality: {
+                consensus: jsonResponse?.statistics?.throughput?.finality?.consensus,
+                client: jsonResponse?.statistics?.throughput?.finality?.client,
+            },
+        },
+    };
+}
+
 function getDashboardUrl(ip) {
     return 'http://' + ip + ':8080/dashboard/index.html';
 }
 
-function getApiUrl(ip) {
-    return 'http://' + ip + ':8080/api';
+function getApiUrl(ip, relativePath) {
+    return 'https://radix-hyperscale-node-stats-proxy.projektvorschau.net/api' + relativePath + (relativePath.includes('?') ? '&' : '?') + 'target=' + ip;
 }
 
 function generateRandomHex(length) {
