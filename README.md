@@ -26,7 +26,7 @@ Easy: just throw this repository on your web server (really only `index.html`, `
 ## Todos
 
 - [x] Public instance of web UI
-- [ ] Load some stats from running nodes (shard number, TPS, finality, etc.)
+- [x] Load some stats from running nodes (shard number, TPS, finality, etc.)
   - [x] Set up a centralized proxy server (required because of CORS)
   - [ ] Make node stat aggregation opt-in
   - [x] Make proxy server host configurable
