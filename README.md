@@ -22,3 +22,12 @@ to avoid unexpected costs.
 ## Self-hosting
 
 Easy: just throw this repository on your web server (really only `index.html`, `app.js` and `cloud-init.txt`).
+
+## Todos
+
+- [x] Public instance of web UI
+- [ ] Load some stats from running nodes (shard number, TPS, finality, etc.)
+- [ ] Deletion of specific nodes
+- [ ] Auto-refresh of node list
+- [ ] Load regions and droplet sizes dynamically
+- [ ] Improve docs
