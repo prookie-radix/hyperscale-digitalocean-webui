@@ -149,7 +149,7 @@
         </div>
     </div>
 
-    <div x-data="hyperscaleFilesBaseUrlInput">
+    <div class="mb-3">
         <div class="">
             <label for="hyperscaleFilesBaseUrlInput" class="form-label fw-bold">Base URL where 'hyperscale.jar' and 'default.config' are found:</label>
         </div>
@@ -173,6 +173,48 @@
             >
             <template x-if="$store.settings.hyperscaleFilesBaseUrl !== $store.settings.hyperscaleFilesBaseUrlDefault">
                 <button class="btn btn-danger" type="button" @click="$store.settings.hyperscaleFilesBaseUrl = $store.settings.hyperscaleFilesBaseUrlDefault">
+                    <i class="bi bi-arrow-counterclockwise" title="Revert to default value"></i>
+                </button>
+            </template>
+        </div>
+        <!--
+        <p class="mt-2 text-muted text-sm">It can be obtained in the API settings of your account: <a href="https://cloud.digitalocean.com/account/api/tokens" target="_blank">https://cloud.digitalocean.com/account/api/tokens</a>.</p>
+
+        <template x-if="$store.settings.apiState.equals(ApiState.Unauthenticated)">
+            <div class="alert alert-danger d-flex align-items-center mt-3" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2" title="Invalid API key"></i>
+                <div>
+                    The provided API key seems to be invalid &mdash; no API access was granted.
+                </div>
+            </div>
+        </template>
+        -->
+    </div>
+
+    <div>
+        <div class="">
+            <label for="nodeStatsProxyHostInput" class="form-label fw-bold">Node stats proxy host:</label>
+        </div>
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="bi bi-server" title="Host address"></i>
+            </span>
+            <input
+                    type="text"
+                    class="form-control"
+                    id="nodeStatsProxyHostInput"
+                    x-model="$store.settings.nodeStatsProxyHost"
+                    placeholder="Enter proxy host"
+                    role="combobox"
+                    aria-expanded="false"
+                    data-lpignore="true"
+                    data-1p-ignore
+                    data-bwignore="true"
+                    data-form-type="other"
+                    autocomplete="nope"
+            >
+            <template x-if="$store.settings.nodeStatsProxyHost !== $store.settings.nodeStatsProxyHostDefault">
+                <button class="btn btn-danger" type="button" @click="$store.settings.nodeStatsProxyHost = $store.settings.nodeStatsProxyHostDefault">
                     <i class="bi bi-arrow-counterclockwise" title="Revert to default value"></i>
                 </button>
             </template>

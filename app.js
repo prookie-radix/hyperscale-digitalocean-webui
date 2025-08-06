@@ -188,6 +188,7 @@ class DigitalOceanPlatform extends BasePlatform {
 
 
 const hyperscaleFilesBaseUrlDefault = 'https://projektvorschau.net/hyperscale/';
+const nodeStatsProxyHostDefault = 'radix-hyperscale-node-stats-proxy.projektvorschau.net';
 
 Alpine.store('settings', {
     apiKey: Alpine.$persist(null).as('settings_apiKey'),
@@ -196,6 +197,11 @@ Alpine.store('settings', {
     apiState: 'unknown',
     hyperscaleFilesBaseUrl: Alpine.$persist(hyperscaleFilesBaseUrlDefault).as('settings_hyperscaleFilesBaseUrl'), // @TODO: validate URL format
     hyperscaleFilesBaseUrlDefault: hyperscaleFilesBaseUrlDefault,
+    nodeStatsProxyHost: Alpine.$persist(nodeStatsProxyHostDefault).as('settings_nodeStatsProxyHost'), // @TODO: validate host format
+    nodeStatsProxyHostDefault: nodeStatsProxyHostDefault,
+    get nodeStatsProxyHostSanitized() {
+        return this.nodeStatsProxyHost.replace(/^https?:\/\//i, '');
+    },
     triggerActiveNodesRefreshCount: 1, // keep at 1 minimum (truthy value)
     triggerActiveNodesRefresh() {
         ++this.triggerActiveNodesRefreshCount;
@@ -575,7 +581,7 @@ function getDashboardUrl(ip) {
 }
 
 function getApiUrl(ip, relativePath) {
-    return 'https://radix-hyperscale-node-stats-proxy.projektvorschau.net/api' + relativePath + (relativePath.includes('?') ? '&' : '?') + 'target=' + ip;
+    return 'https://' + Alpine.store('settings').nodeStatsProxyHostSanitized + '/api' + relativePath + (relativePath.includes('?') ? '&' : '?') + 'target=' + ip;
 }
 
 function generateRandomHex(length) {
