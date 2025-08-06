@@ -29,7 +29,7 @@ Easy: just throw this repository on your web server (really only `index.html`, `
 - [ ] Load some stats from running nodes (shard number, TPS, finality, etc.)
   - [x] Set up a centralized proxy server (required because of CORS)
   - [ ] Make node stat aggregation opt-in
-  - [ ] Make proxy server host configurable
+  - [x] Make proxy server host configurable
 - [ ] Deletion of specific nodes
 - [ ] Auto-refresh of node list
 - [ ] Load regions and droplet sizes dynamically
