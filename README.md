@@ -30,4 +30,5 @@ Easy: just throw this repository on your web server (really only `index.html`, `
 - [ ] Deletion of specific nodes
 - [ ] Auto-refresh of node list
 - [ ] Load regions and droplet sizes dynamically
+- [ ] Check in realtime if jar and config file are available under given base URL
 - [ ] Improve docs
