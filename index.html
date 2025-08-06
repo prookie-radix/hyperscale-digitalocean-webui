@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Radix Hyperscale DigitalOcean Node Automation Web UI</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+          integrity="sha256-zRgmWB5PK4CvTx4FiXsxbHaYRBBjz/rvu97sOC7kzXI="
+          crossorigin="anonymous">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+          integrity="sha256-pdY4ejLKO67E0CM2tbPtq1DJ3VGDVVdqAR6j3ZwdiE4="
+          crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/@alpinejs/persist@3.14.9/dist/cdn.min.js"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.9/dist/cdn.min.js"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dots-wrapper@3.12.3/dist/index-browser.min.js"
+            integrity="sha256-VNtNSXx2u4QJfHoiB135Jbs0hxYf/MDEZdCHy4pxwfc="
+            crossorigin="anonymous"></script>
+    <script src="app.js"></script>
+    <style>
+        .spinner, .spinner-150 {
+            display: inline-block;
+            transform-origin: center;
+        }
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        .spinner-150 {
+            animation: spin-150 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        @keyframes spin-150 {
+            100% {
+                transform: scale(1.5) rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="display-5">Radix Hyperscale DigitalOcean Node Automation Web UI</h1>
+
+    <div x-data="{ show: true }" x-show.important="show" class="alert alert-warning d-flex align-items-start alert-dismissible fade show mt-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2" title="Info"></i>
+        <div>
+            This application runs entirely in your browser.<br>
+            No data—including your API key, queries, or results—is ever sent to our servers.<br>
+            All processing happens locally on your device. The settings including your API key are stored in the LocalStorage of your browser. We do not collect, store, or transmit any personal or usage information.<br>
+            <br>
+            You are solely responsible for the security and usage of your API key. We are not liable for any charges, rate limits, or other consequences incurred through use of this application with your API key. Always monitor your account usage to avoid unexpected costs.<br>
+            <br>
+            Important: Only use API keys you trust to share with third-party tools. The minimally required access rights are described down below.<br>
+            <!--<br>
+            <a class="btn btn-outline-dark btn-sm" href="#"><i class="bi bi-eye-slash-fill me-1"></i> Hide this info permanently</a>-->
+        </div>
+        <button type="button" class="btn-close" @click="show = false" aria-label="Close"></button>
+    </div>
+
+    <div x-data="{ show: true }" x-show.important="show" class="alert alert-light d-flex align-items-start alert-dismissible mt-3" role="alert">
+        <i class="bi bi-info-circle-fill me-2" title="Self-hosting"></i>
+        <div>
+            This web UI can easily be self-hosted (three static files). See <a href="https://github.com/prookie-radix/hyperscale-digitalocean-webui" target="_blank">https://github.com/prookie-radix/hyperscale-digitalocean-webui</a>.
+            <!--<br>
+            <a class="btn btn-outline-dark btn-sm" href="#"><i class="bi bi-eye-slash-fill me-1"></i> Hide this info permanently</a>-->
+        </div>
+        <button type="button" class="btn-close" @click="show = false" aria-label="Close"></button>
+    </div>
+
+    <h2 class="mt-5">Settings</h2>
+
+    <div x-data="apiKeyInput">
+        <div class="d-flex justify-content-between align-items-end">
+            <label for="apiKeyInput" class="form-label fw-bold">DigitalOcean API Key:</label>
+            <button class="btn btn-outline-secondary btn-sm mb-2" @click="scopeInfoVisible = !scopeInfoVisible">
+                <i class="bi bi-key-fill me-1"></i> <span x-text="(scopeInfoVisible ? 'Hide' : 'Show') + ' required scopes'"></span>
+            </button>
+        </div>
+        <div class="input-group">
+            <span class="input-group-text">
+                <i x-show="$store.settings.apiState.equals(ApiState.Unknown)" class="bi bi-question-lg" style="transform:scale(1.5)" title="Please supply an API key"></i>
+                <i x-show="$store.settings.apiState.equals(ApiState.Evaluating)" class="bi bi-arrow-repeat spinner-150" style="transform:scale(1.5)" title="Checking API key"></i>
+                <i x-show="$store.settings.apiState.equals(ApiState.Ok)" class="bi bi-check-lg text-success" style="transform:scale(1.5)" title="Valid API key"></i>
+                <i x-show="$store.settings.apiState.equals(ApiState.Unauthenticated)" class="bi bi-exclamation-lg text-danger" style="transform:scale(1.5)" title="Invalid API key"></i>
+            </span>
+            <input
+                    :type="visible ? 'text' : 'password'"
+                    class="form-control"
+                    id="apiKeyInput"
+                    x-model="$store.settings.apiKey"
+                    @input="onInputChange"
+                    placeholder="Enter API key"
+                    role="combobox"
+                    aria-expanded="false"
+                    data-lpignore="true"
+                    data-1p-ignore
+                    data-bwignore="true"
+                    data-form-type="other"
+                    autocomplete="nope"
+            >
+            <button class="btn btn-secondary" type="button" @click="toggleVisibility">
+                <i x-show="visible" class="bi bi-eye-slash-fill" title="Hide key"></i>
+                <i x-show="!visible" class="bi bi-eye-fill" title="Show key"></i>
+            </button>
+        </div>
+
+        <p class="mt-2 text-muted text-sm">It can be obtained in the API settings of your account: <a href="https://cloud.digitalocean.com/account/api/tokens" target="_blank">https://cloud.digitalocean.com/account/api/tokens</a>.</p>
+
+        <template x-if="$store.settings.apiState.equals(ApiState.Unauthenticated)">
+            <div class="alert alert-danger d-flex align-items-center mt-3" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2" title="Invalid API key"></i>
+                <div>
+                    The provided API key seems to be invalid &mdash; no API access was granted.
+                </div>
+            </div>
+        </template>
+
+        <div x-show="scopeInfoVisible" class="mt-4">
+            <div>The following scopes need to be enabled for the provided API key:</div>
+            <table class="table table-striped" style="max-width:240px;">
+                <thead>
+                <tr>
+                    <th>Scope</th>
+                    <th>Permissions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>droplet</td>
+                    <td class="fst-italic">create<br>delete</td>
+                </tr>
+                <tr>
+                    <td>ssh_key</td>
+                    <td class="fst-italic">read</td>
+                </tr>
+                <tr>
+                    <td>tag</td>
+                    <td class="fst-italic">create</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div x-data="hyperscaleFilesBaseUrlInput">
+        <div class="">
+            <label for="hyperscaleFilesBaseUrlInput" class="form-label fw-bold">Base URL where 'hyperscale.jar' and 'default.config' are found:</label>
+        </div>
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="bi bi-globe" title="Web URL"></i>
+            </span>
+            <input
+                    type="text"
+                    class="form-control"
+                    id="hyperscaleFilesBaseUrlInput"
+                    x-model="$store.settings.hyperscaleFilesBaseUrl"
+                    placeholder="Enter base URL"
+                    role="combobox"
+                    aria-expanded="false"
+                    data-lpignore="true"
+                    data-1p-ignore
+                    data-bwignore="true"
+                    data-form-type="other"
+                    autocomplete="nope"
+            >
+            <template x-if="$store.settings.hyperscaleFilesBaseUrl !== $store.settings.hyperscaleFilesBaseUrlDefault">
+                <button class="btn btn-danger" type="button" @click="$store.settings.hyperscaleFilesBaseUrl = $store.settings.hyperscaleFilesBaseUrlDefault">
+                    <i class="bi bi-arrow-counterclockwise" title="Revert to default value"></i>
+                </button>
+            </template>
+        </div>
+        <!--
+        <p class="mt-2 text-muted text-sm">It can be obtained in the API settings of your account: <a href="https://cloud.digitalocean.com/account/api/tokens" target="_blank">https://cloud.digitalocean.com/account/api/tokens</a>.</p>
+
+        <template x-if="$store.settings.apiState.equals(ApiState.Unauthenticated)">
+            <div class="alert alert-danger d-flex align-items-center mt-3" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2" title="Invalid API key"></i>
+                <div>
+                    The provided API key seems to be invalid &mdash; no API access was granted.
+                </div>
+            </div>
+        </template>
+        -->
+    </div>
+</div>
+<template x-if="!$store.settings.apiState.equals(ApiState.Ok)">
+    <div class="container mt-5">
+        <div class="py-5">
+            <h2 class="text-center my-5">Please provide a valid API key to continue.</h2>
+        </div>
+    </div>
+</template>
+
+<template x-if="$store.settings.apiState.equals(ApiState.Ok)">
+    <div>
+        <div x-data="createNodes" class="mt-5">
+            <div class="container">
+                <h2>Create droplets / nodes</h2>
+                <form class="row g-3" @submit.prevent="handleSubmit">
+                    <div class="col-12 col-md-auto">
+                        <label for="inputCreateRegion" class="form-label fw-bold">Region</label>
+                        <select id="inputCreateRegion" class="form-select" x-model="region" :disabled="loading">
+                            <option value="" disabled selected>Select...</option>
+                            <option>LON1</option>
+                            <option>AMS3</option>
+                            <option>FRA1</option>
+                            <option>NYC</option>
+                            <option>NYC1</option>
+                            <option>NYC2</option>
+                            <option>NYC3</option>
+                            <option>SFO</option>
+                            <option>SFO2</option>
+                            <option>SFO3</option>
+                            <option>SGP1</option>
+                            <option>TOR1</option>
+                            <option>BLR1</option>
+                            <option>SYD1</option>
+                            <option>ATL1</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-auto">
+                        <label for="inputCreateSize" class="form-label fw-bold">Size</label>
+                        <select id="inputCreateSize" class="form-select" x-model="size" :disabled="loading">
+                            <option value="" disabled selected>Select...</option>
+                            <option>c-8</option>
+                            <option>s-4vcpu-16gb-amd</option>
+                        </select>
+                    </div>
+                    <div class="col-12 col-md-auto">
+                        <label for="inputCreateQuantity" class="form-label fw-bold">Quantity</label>
+                        <input type="number" min="1" max="50" class="form-control" id="inputCreateQuantity" x-model="quantity" :disabled="loading">
+                    </div>
+                    <div class="col-12 col-md-auto d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary" :disabled="loading">
+                            <i x-show="!loading" class="bi bi-database-fill-add me-1"></i>
+                            <i x-show="loading" class="bi bi-arrow-repeat me-1" :class="{'spinner': loading}"></i>
+                            Create
+                        </button>
+                    </div>
+                </form>
+                <!--<p class="text-muted mt-3">Droplets will be created with tag <code x-text="costs.forTag"></code> which enables the list and delete functionalities.</p>-->
+            </div>
+        </div>
+
+        <div x-data="activeNodes" class="container-fluid px-0 mt-5" style="max-width:1800px;">
+            <div class="">
+                <div class="container d-flex justify-content-between align-items-end">
+                    <h2>Currently running droplets / nodes</h2>
+                    <button class="btn btn-secondary mb-2" :disabled="loading" @click="load">
+                        <i class="bi bi-arrow-repeat me-1" :class="{'spinner': loading}"></i> Refresh list
+                    </button>
+                </div>
+
+                <template x-if="error">
+                    <div class="container">
+                        <div class="alert alert-danger d-flex align-items-center mt-3" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2" title="Error"></i>
+                            <div>
+                                Could not load list of active/running nodes. Does the provided API key have the required access rights (scopes)?
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <template x-if="empty && !loading">
+                    <div class="container">
+                        <div class="alert alert-info d-flex align-items-center mt-3" role="alert">
+                            <i class="bi bi-info-fill me-2" title="Info"></i>
+                            <div>
+                                No nodes currently active/running.
+                            </div>
+                        </div>
+                    </div>
+                </template>
+
+                <template x-if="loading">
+                    <div class="d-flex justify-content-center fs-1 text-muted py-5">
+                        <i class="bi bi-arrow-repeat spinner" title="Loading..."></i>
+                    </div>
+                </template>
+
+                <table x-show="!empty && !loading" class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>name</th>
+                        <th>memory</th>
+                        <th>vcpus</th>
+                        <th>disk</th>
+                        <th>status</th>
+                        <th>created_at</th>
+                        <th>image</th>
+                        <th>size</th>
+                        <th>price_hourly</th>
+                        <th>region</th>
+                        <th>ip</th>
+                        <th>Links</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <template x-for="node in list">
+                        <tr>
+                            <td x-text="node.name"></td>
+                            <td x-text="node.memory_formatted"></td>
+                            <td x-text="node.vcpus"></td>
+                            <td x-text="node.disk_formatted"></td>
+                            <td x-text="node.status"></td>
+                            <td x-text="node.created_at"></td>
+                            <td x-text="node.image"></td>
+                            <td x-text="node.size"></td>
+                            <td x-text="node.price_hourly_formatted"></td>
+                            <td x-text="node.region"></td>
+                            <td x-text="node.ip ?? 'n/a yet'"></td>
+                            <td>
+                                <template x-if="node.dashboard">
+                                    <a :href="node.dashboard" target="_blank">Dashboard</a>
+                                </template>
+                                <template x-if="node.ip">
+                                    <a :href="'ssh://root@'+node.ip" target="_blank">SSH</a>
+                                </template>
+                            </td>
+                        </tr>
+                    </template>
+                    </tbody>
+                </table>
+
+                <div class="container d-flex justify-content-between align-items-end">
+                    <button x-data="deleteAllNodes" class="btn btn-danger mb-2" :disabled="loading || empty" @click="deleteAll">
+                        <i x-show="!loading" class="bi bi-trash3-fill me-1"></i>
+                        <i x-show="loading" class="bi bi-arrow-repeat me-1" :class="{'spinner': loading}"></i>
+                        Delete all nodes
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div x-data="currentCosts" class="my-5">
+            <div class="container">
+                <div class="d-flex justify-content-between align-items-end">
+                    <h2>Current costs</h2>
+                    <button class="btn btn-secondary mb-2" :disabled="loading" @click="load">
+                        <i class="bi bi-arrow-repeat me-1" :class="{'spinner': loading}"></i> Refresh
+                    </button>
+                </div>
+
+                <template x-if="error">
+                    <div class="alert alert-danger d-flex align-items-center mt-3" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-2" title="Error"></i>
+                        <div>
+                            Could not load current costs. Does the provided API key have the required access rights (scopes)?
+                        </div>
+                    </div>
+                </template>
+
+                <template x-if="costs">
+                    <div>
+                        <table class="table table-striped" style="max-width:320px;">
+                            <tbody>
+                            <tr>
+                                <td>Current droplet count</td>
+                                <td x-text="costs.dropletCount"></td>
+                            </tr>
+                            <tr>
+                                <td>Current price hourly</td>
+                                <td x-text="costs.priceHourlyFormatted" class="fw-bold"></td>
+                            </tr>
+                            <tr>
+                                <td>Current price monthly</td>
+                                <td x-text="costs.priceMonthlyFormatted"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <p class="text-muted">Only showing costs for droplets with tag <code x-text="costs.forTag"></code>!</p>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+</template>
+</body>
+</html>
