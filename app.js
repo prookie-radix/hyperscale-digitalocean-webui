@@ -375,6 +375,9 @@ Alpine.data('deleteAllNodes', () => ({
         try {
             this.loading = true;
             await Alpine.store('settings').api.deleteAllActiveNodes();
+
+            await sleep(2000); // wait some time for the droplet list refresh
+
             Alpine.store('settings').triggerActiveNodesRefresh();
         }
         catch (e) {
