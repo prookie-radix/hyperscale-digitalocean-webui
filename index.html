@@ -73,173 +73,7 @@
         </div>
         <button type="button" class="btn-close" @click="show = false" aria-label="Close"></button>
     </div>
-
-    <h2 class="mt-5">Settings</h2>
-
-    <div x-data="apiKeyInput">
-        <div class="d-flex justify-content-between align-items-end">
-            <label for="apiKeyInput" class="form-label fw-bold">DigitalOcean API Key:</label>
-            <button class="btn btn-outline-secondary btn-sm mb-2" @click="scopeInfoVisible = !scopeInfoVisible">
-                <i class="bi bi-key-fill me-1"></i> <span x-text="(scopeInfoVisible ? 'Hide' : 'Show') + ' required scopes'"></span>
-            </button>
-        </div>
-        <div class="input-group">
-            <span class="input-group-text">
-                <i x-show="$store.settings.apiState.equals(ApiState.Unknown)" class="bi bi-question-lg" style="transform:scale(1.5)" title="Please supply an API key"></i>
-                <i x-show="$store.settings.apiState.equals(ApiState.Evaluating)" class="bi bi-arrow-repeat spinner-150" style="transform:scale(1.5)" title="Checking API key"></i>
-                <i x-show="$store.settings.apiState.equals(ApiState.Ok)" class="bi bi-check-lg text-success" style="transform:scale(1.5)" title="Valid API key"></i>
-                <i x-show="$store.settings.apiState.equals(ApiState.Unauthenticated)" class="bi bi-exclamation-lg text-danger" style="transform:scale(1.5)" title="Invalid API key"></i>
-            </span>
-            <input
-                    :type="visible ? 'text' : 'password'"
-                    class="form-control"
-                    id="apiKeyInput"
-                    x-model="$store.settings.apiKey"
-                    @input="onInputChange"
-                    placeholder="Enter API key"
-                    role="combobox"
-                    aria-expanded="false"
-                    data-lpignore="true"
-                    data-1p-ignore
-                    data-bwignore="true"
-                    data-form-type="other"
-                    autocomplete="nope"
-            >
-            <button class="btn btn-secondary" type="button" @click="toggleVisibility">
-                <i x-show="visible" class="bi bi-eye-slash-fill" title="Hide key"></i>
-                <i x-show="!visible" class="bi bi-eye-fill" title="Show key"></i>
-            </button>
-        </div>
-
-        <p class="mt-2 text-muted text-sm">It can be obtained in the API settings of your account: <a href="https://cloud.digitalocean.com/account/api/tokens" target="_blank">https://cloud.digitalocean.com/account/api/tokens</a>.</p>
-
-        <template x-if="$store.settings.apiState.equals(ApiState.Unauthenticated)">
-            <div class="alert alert-danger d-flex align-items-center mt-3" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2" title="Invalid API key"></i>
-                <div>
-                    The provided API key seems to be invalid &mdash; no API access was granted.
-                </div>
-            </div>
-        </template>
-
-        <div x-show="scopeInfoVisible" class="mt-4">
-            <div>The following scopes need to be enabled for the provided API key:</div>
-            <table class="table table-striped" style="max-width:240px;">
-                <thead>
-                <tr>
-                    <th>Scope</th>
-                    <th>Permissions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>droplet</td>
-                    <td class="fst-italic">create<br>delete</td>
-                </tr>
-                <tr>
-                    <td>ssh_key</td>
-                    <td class="fst-italic">read</td>
-                </tr>
-                <tr>
-                    <td>tag</td>
-                    <td class="fst-italic">create</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <div class="mb-3">
-        <div class="">
-            <label for="hyperscaleFilesBaseUrlInput" class="form-label fw-bold">Base URL where 'hyperscale.jar' and 'default.config' are found:</label>
-        </div>
-        <div class="input-group">
-            <span class="input-group-text">
-                <i class="bi bi-globe" title="Web URL"></i>
-            </span>
-            <input
-                    type="text"
-                    class="form-control"
-                    id="hyperscaleFilesBaseUrlInput"
-                    x-model="$store.settings.hyperscaleFilesBaseUrl"
-                    placeholder="Enter base URL"
-                    role="combobox"
-                    aria-expanded="false"
-                    data-lpignore="true"
-                    data-1p-ignore
-                    data-bwignore="true"
-                    data-form-type="other"
-                    autocomplete="nope"
-            >
-            <template x-if="$store.settings.hyperscaleFilesBaseUrl !== $store.settings.hyperscaleFilesBaseUrlDefault">
-                <button class="btn btn-danger" type="button" @click="$store.settings.hyperscaleFilesBaseUrl = $store.settings.hyperscaleFilesBaseUrlDefault">
-                    <i class="bi bi-arrow-counterclockwise" title="Revert to default value"></i>
-                </button>
-            </template>
-        </div>
-        <!--
-        <p class="mt-2 text-muted text-sm">It can be obtained in the API settings of your account: <a href="https://cloud.digitalocean.com/account/api/tokens" target="_blank">https://cloud.digitalocean.com/account/api/tokens</a>.</p>
-
-        <template x-if="$store.settings.apiState.equals(ApiState.Unauthenticated)">
-            <div class="alert alert-danger d-flex align-items-center mt-3" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2" title="Invalid API key"></i>
-                <div>
-                    The provided API key seems to be invalid &mdash; no API access was granted.
-                </div>
-            </div>
-        </template>
-        -->
-    </div>
-
-    <div>
-        <div class="">
-            <label for="nodeStatsProxyHostInput" class="form-label fw-bold">Node stats proxy host:</label>
-        </div>
-        <div class="input-group">
-            <span class="input-group-text">
-                <i class="bi bi-server" title="Host address"></i>
-            </span>
-            <input
-                    type="text"
-                    class="form-control"
-                    id="nodeStatsProxyHostInput"
-                    x-model="$store.settings.nodeStatsProxyHost"
-                    placeholder="Enter proxy host"
-                    role="combobox"
-                    aria-expanded="false"
-                    data-lpignore="true"
-                    data-1p-ignore
-                    data-bwignore="true"
-                    data-form-type="other"
-                    autocomplete="nope"
-            >
-            <template x-if="$store.settings.nodeStatsProxyHost !== $store.settings.nodeStatsProxyHostDefault">
-                <button class="btn btn-danger" type="button" @click="$store.settings.nodeStatsProxyHost = $store.settings.nodeStatsProxyHostDefault">
-                    <i class="bi bi-arrow-counterclockwise" title="Revert to default value"></i>
-                </button>
-            </template>
-        </div>
-        <!--
-        <p class="mt-2 text-muted text-sm">It can be obtained in the API settings of your account: <a href="https://cloud.digitalocean.com/account/api/tokens" target="_blank">https://cloud.digitalocean.com/account/api/tokens</a>.</p>
-
-        <template x-if="$store.settings.apiState.equals(ApiState.Unauthenticated)">
-            <div class="alert alert-danger d-flex align-items-center mt-3" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2" title="Invalid API key"></i>
-                <div>
-                    The provided API key seems to be invalid &mdash; no API access was granted.
-                </div>
-            </div>
-        </template>
-        -->
-    </div>
 </div>
-<template x-if="!$store.settings.apiState.equals(ApiState.Ok)">
-    <div class="container mt-5">
-        <div class="py-5">
-            <h2 class="text-center my-5">Please provide a valid API key to continue.</h2>
-        </div>
-    </div>
-</template>
 
 <template x-if="$store.settings.apiState.equals(ApiState.Ok)">
     <div>
@@ -456,5 +290,175 @@
         </div>
     </div>
 </template>
+
+<div class="container my-5">
+    <template x-if="!$store.settings.apiState.equals(ApiState.Ok)">
+        <div class="py-5">
+            <h2 class="text-center my-5">Please provide a valid API key to continue.</h2>
+        </div>
+    </template>
+
+    <hr class="mt-5">
+
+    <h2 class="">Settings</h2>
+
+    <div x-data="apiKeyInput">
+        <div class="d-flex justify-content-between align-items-end">
+            <label for="apiKeyInput" class="form-label fw-bold">DigitalOcean API Key:</label>
+            <button class="btn btn-outline-secondary btn-sm mb-2" @click="scopeInfoVisible = !scopeInfoVisible">
+                <i class="bi bi-key-fill me-1"></i> <span x-text="(scopeInfoVisible ? 'Hide' : 'Show') + ' required scopes'"></span>
+            </button>
+        </div>
+        <div class="input-group">
+            <span class="input-group-text">
+                <i x-show="$store.settings.apiState.equals(ApiState.Unknown)" class="bi bi-question-lg" style="transform:scale(1.5)" title="Please supply an API key"></i>
+                <i x-show="$store.settings.apiState.equals(ApiState.Evaluating)" class="bi bi-arrow-repeat spinner-150" style="transform:scale(1.5)" title="Checking API key"></i>
+                <i x-show="$store.settings.apiState.equals(ApiState.Ok)" class="bi bi-check-lg text-success" style="transform:scale(1.5)" title="Valid API key"></i>
+                <i x-show="$store.settings.apiState.equals(ApiState.Unauthenticated)" class="bi bi-exclamation-lg text-danger" style="transform:scale(1.5)" title="Invalid API key"></i>
+            </span>
+            <input
+                    :type="visible ? 'text' : 'password'"
+                    class="form-control"
+                    id="apiKeyInput"
+                    x-model="$store.settings.apiKey"
+                    @input="onInputChange"
+                    placeholder="Enter API key"
+                    role="combobox"
+                    aria-expanded="false"
+                    data-lpignore="true"
+                    data-1p-ignore
+                    data-bwignore="true"
+                    data-form-type="other"
+                    autocomplete="nope"
+            >
+            <button class="btn btn-secondary" type="button" @click="toggleVisibility">
+                <i x-show="visible" class="bi bi-eye-slash-fill" title="Hide key"></i>
+                <i x-show="!visible" class="bi bi-eye-fill" title="Show key"></i>
+            </button>
+        </div>
+
+        <p class="mt-2 text-muted text-sm">It can be obtained in the API settings of your account: <a href="https://cloud.digitalocean.com/account/api/tokens" target="_blank">https://cloud.digitalocean.com/account/api/tokens</a>.</p>
+
+        <template x-if="$store.settings.apiState.equals(ApiState.Unauthenticated)">
+            <div class="alert alert-danger d-flex align-items-center mt-3" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2" title="Invalid API key"></i>
+                <div>
+                    The provided API key seems to be invalid &mdash; no API access was granted.
+                </div>
+            </div>
+        </template>
+
+        <div x-show="scopeInfoVisible" class="mt-4">
+            <div>The following scopes need to be enabled for the provided API key:</div>
+            <table class="table table-striped" style="max-width:240px;">
+                <thead>
+                <tr>
+                    <th>Scope</th>
+                    <th>Permissions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>droplet</td>
+                    <td class="fst-italic">create<br>delete</td>
+                </tr>
+                <tr>
+                    <td>ssh_key</td>
+                    <td class="fst-italic">read</td>
+                </tr>
+                <tr>
+                    <td>tag</td>
+                    <td class="fst-italic">create</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <div class="">
+            <label for="hyperscaleFilesBaseUrlInput" class="form-label fw-bold">Base URL where 'hyperscale.jar' and 'default.config' are found:</label>
+        </div>
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="bi bi-globe" title="Web URL"></i>
+            </span>
+            <input
+                    type="text"
+                    class="form-control"
+                    id="hyperscaleFilesBaseUrlInput"
+                    x-model="$store.settings.hyperscaleFilesBaseUrl"
+                    placeholder="Enter base URL"
+                    role="combobox"
+                    aria-expanded="false"
+                    data-lpignore="true"
+                    data-1p-ignore
+                    data-bwignore="true"
+                    data-form-type="other"
+                    autocomplete="nope"
+            >
+            <template x-if="$store.settings.hyperscaleFilesBaseUrl !== $store.settings.hyperscaleFilesBaseUrlDefault">
+                <button class="btn btn-danger" type="button" @click="$store.settings.hyperscaleFilesBaseUrl = $store.settings.hyperscaleFilesBaseUrlDefault">
+                    <i class="bi bi-arrow-counterclockwise" title="Revert to default value"></i>
+                </button>
+            </template>
+        </div>
+        <!--
+        <p class="mt-2 text-muted text-sm">It can be obtained in the API settings of your account: <a href="https://cloud.digitalocean.com/account/api/tokens" target="_blank">https://cloud.digitalocean.com/account/api/tokens</a>.</p>
+
+        <template x-if="$store.settings.apiState.equals(ApiState.Unauthenticated)">
+            <div class="alert alert-danger d-flex align-items-center mt-3" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2" title="Invalid API key"></i>
+                <div>
+                    The provided API key seems to be invalid &mdash; no API access was granted.
+                </div>
+            </div>
+        </template>
+        -->
+    </div>
+
+    <div>
+        <div class="">
+            <label for="nodeStatsProxyHostInput" class="form-label fw-bold">Node stats proxy host:</label>
+        </div>
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="bi bi-server" title="Host address"></i>
+            </span>
+            <input
+                    type="text"
+                    class="form-control"
+                    id="nodeStatsProxyHostInput"
+                    x-model="$store.settings.nodeStatsProxyHost"
+                    placeholder="Enter proxy host"
+                    role="combobox"
+                    aria-expanded="false"
+                    data-lpignore="true"
+                    data-1p-ignore
+                    data-bwignore="true"
+                    data-form-type="other"
+                    autocomplete="nope"
+            >
+            <template x-if="$store.settings.nodeStatsProxyHost !== $store.settings.nodeStatsProxyHostDefault">
+                <button class="btn btn-danger" type="button" @click="$store.settings.nodeStatsProxyHost = $store.settings.nodeStatsProxyHostDefault">
+                    <i class="bi bi-arrow-counterclockwise" title="Revert to default value"></i>
+                </button>
+            </template>
+        </div>
+        <!--
+        <p class="mt-2 text-muted text-sm">It can be obtained in the API settings of your account: <a href="https://cloud.digitalocean.com/account/api/tokens" target="_blank">https://cloud.digitalocean.com/account/api/tokens</a>.</p>
+
+        <template x-if="$store.settings.apiState.equals(ApiState.Unauthenticated)">
+            <div class="alert alert-danger d-flex align-items-center mt-3" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2" title="Invalid API key"></i>
+                <div>
+                    The provided API key seems to be invalid &mdash; no API access was granted.
+                </div>
+            </div>
+        </template>
+        -->
+    </div>
+</div>
+
 </body>
 </html>
