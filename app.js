@@ -287,7 +287,7 @@ Alpine.data('createNodes', () => ({
     resetForm() {
         this.quantity = 1;
         this.region = 'ams';
-        this.size = 's-4vcpu-16gb-amd';
+        this.size = 'gd-4vcpu-16gb-intel';
     },
 
     async handleSubmit() {
