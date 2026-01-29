@@ -105,12 +105,17 @@ runcmd:
     EOF
     done
 
+  - sleep 3
+
   # Reload systemd, enable, and start the services
   - systemctl daemon-reload
+  - sleep 3
   - |
     for i in $(seq 0 $((INSTANCES_COUNT-1))); do
       systemctl enable cassandra$i.service
+      sleep 1
       systemctl start cassandra$i.service
+      sleep 1
     done
 
   # Add helper function for checking status
