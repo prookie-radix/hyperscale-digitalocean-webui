@@ -187,7 +187,7 @@ class DigitalOceanPlatform extends BasePlatform {
 }
 
 
-const hyperscaleFilesBaseUrlDefault = 'https://artq.ddns.net/hyperscale/';
+const hyperscaleFilesBaseUrlDefault = 'https://hyperscale-files.astrl.trade/';
 const nodeStatsProxyHostDefault = 'radix-hyperscale-node-stats-proxy.projektvorschau.net';
 
 Alpine.store('settings', {
