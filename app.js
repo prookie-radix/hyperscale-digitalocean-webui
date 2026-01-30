@@ -144,6 +144,7 @@ class DigitalOceanPlatform extends BasePlatform {
             image: "ubuntu-24-04-x64", // string
             tags: [this.dropletTag],
             ssh_keys: availableSshKeyFingerprints,
+            ipv6: false,
             monitoring: true,
             user_data: cloudInitContent.trim(),
             with_droplet_agent: true,
