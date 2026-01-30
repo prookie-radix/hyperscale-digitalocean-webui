@@ -7,6 +7,18 @@ packages:
   - wget
   - zip
 
+write_files:
+  # set new buffer size to 4MB
+  - path: /etc/sysctl.d/999-tcp-buffer-tuning.conf
+    owner: root:root
+    permissions: '0644'
+    content: |
+      net.core.wmem_max = 4194304
+      net.core.rmem_max = 4194304
+      net.ipv4.tcp_wmem = 4096 87380 4194304
+      net.ipv4.tcp_rmem = 4096 87380 4194304
+      net.ipv4.tcp_window_scaling = 1
+
 runcmd:
   - INSTANCES_COUNT=1
 
@@ -18,59 +30,23 @@ runcmd:
   - wget -O /opt/app/hyperscale.jar $FILE1_URL
   - wget -O /opt/app/default.config $FILE2_URL
 
-  # Add helper function for checking status
+  - chmod +x /opt/app/hyperscale.jar
+
+  - [ sysctl, -p, /etc/sysctl.d/999-tcp-buffer-tuning.conf ]
+
   - |
-    cat <<EOF > /opt/app/ipbuffers-local.sh
-    #!/bin/bash
-    NEW_BUFFER_SIZE="4194304"  # 4MB in bytes
-
-    # Backup original
-    cp /etc/sysctl.conf /etc/sysctl.conf.backup
-
-    # Function to add or update a setting
-    update_sysctl() {
-        local key=$1
-        local value=$2
-
-        # If setting exists, replace it, otherwise append
-        if grep -q "^${key}[[:space:]]*=" /etc/sysctl.conf; then
-            # Replace existing setting
-        sed -i "/^${key}[[:space:]]*=/c\\${key} = ${value}" /etc/sysctl.conf
-        else
-        # Append new setting
-            echo "${key} = ${value}" >> /etc/sysctl.conf
-        fi
-    }
-
-    # Update each setting
-    update_sysctl "net.core.wmem_max" "$NEW_BUFFER_SIZE"
-    update_sysctl "net.core.rmem_max" "$NEW_BUFFER_SIZE"
-    update_sysctl "net.ipv4.tcp_wmem" "4096 87380 $NEW_BUFFER_SIZE"
-    update_sysctl "net.ipv4.tcp_rmem" "4096 87380 $NEW_BUFFER_SIZE"
-    update_sysctl "net.ipv4.tcp_window_scaling" "1"
-
-    # Apply changes
-    sysctl -p
-
-    # Verify changes
     echo "Current settings:"
     sysctl net.core.wmem_max
     sysctl net.core.rmem_max
     sysctl net.ipv4.tcp_wmem
     sysctl net.ipv4.tcp_rmem
     sysctl net.ipv4.tcp_window_scaling
-    EOF
 
 #  - |
 #    if [ ! -s /opt/app/hyperscale.jar ] || [ ! -s /opt/app/default.config ]; then
 #      echo "Error: Required files not downloaded or empty. Shutting down..."
 #      shutdown -h now
 #    fi
-
-  - chmod +x /opt/app/hyperscale.jar
-  - chmod +x /opt/app/ipbuffers-local.sh
-
-  - /opt/app/ipbuffers-local.sh
 
   # Dynamically create systemd service files and modify configs
   - |
