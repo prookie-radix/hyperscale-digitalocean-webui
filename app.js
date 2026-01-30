@@ -384,6 +384,10 @@ Alpine.data('deleteAllNodes', () => ({
             return;
         }
 
+        if (!confirm('Do you really want to destroy all droplets? Do not do this while a test is running!')) {
+            return;
+        }
+
         try {
             this.loading = true;
             await Alpine.store('settings').api.deleteAllActiveNodes();
